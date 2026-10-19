@@ -3347,7 +3347,7 @@
 
 /* Jab toast active hoga tab upar aayega */
 .orientation-toast.show {
-    bottom: 30px; /* Screen ke bottom se 30px upar dikhega */
+    bottom: 300px; /* Screen ke bottom se 30px upar dikhega */
 }
 
 .toast-content {
