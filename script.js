@@ -495,8 +495,266 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 //=================on click get open java======================//
+
+//=================================================================================
+//         BIHAR DRUGS AGENCY (BDA)- HEADER MENU BUTTON ON CLICK HOVER STARTS
+//=================================================================================
+ // 1. HAMBURGER LOGIC (Pure document par click trace karega)
+document.addEventListener('click', function (e) {
+    // Agar bdaHamburgerBtn par click ho ya uske andar ke <span> par
+    if (e.target.closest('#bdaHamburgerBtn') || e.target.closest('.bda-hamburger')) {
+        const navMenu = document.getElementById('bdaNavMenu');
+        if (navMenu) {
+            navMenu.classList.toggle('open');
+            console.log("Menu Open/Close Toggle Hua!");
+        }
+    }
+});
+
+// 2. ACTIVE PAGE LOGIC (Page load hote hi highlight karega)
+document.addEventListener("DOMContentLoaded", function () {
+    // Current URL se page ka naam nikalega (e.g., aboutpage.html)
+    const currentPage = window.location.pathname.split("/").pop();
+    const menuLinks = document.querySelectorAll('#bdaNavMenu li a');
+
+    menuLinks.forEach(link => {
+        // Pehle se lagi active class hatayein
+        link.classList.remove('bda-active');
+        
+        // Link ka href nikalen
+        const linkPage = link.getAttribute('href');
+
+        // Agar match kare toh active class laga dein
+        if (currentPage === linkPage) {
+            link.classList.add('bda-active');
+        } 
+        // Default home page ke liye condition
+        else if ((currentPage === "" || currentPage === "index.html") && linkPage === "index.html") {
+            link.classList.add('bda-active');
+        }
+    });
+});
+
+//=================================================================================
+//          BIHAR DRUGS AGENCY (BDA)- HEADER MENU BUTTON ON CLICK HOVER ENDS
+//=================================================================================
+
+
+///-===============================================================//
+//                    LIST VIEW POP SCRIPT STARTS
+//=================================================================//
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Element selectors
+    const listViewBtn = document.getElementById('btn-grid-view'); 
+    const alertToast = document.getElementById("orientationAlert");
+    const closeBtn = document.getElementById("closeToastBtn");
+    
+    // Pura URL nikalne ke liye
+    const currentUrl = window.location.href;
+
+    // Shuru me pop-up ko hidden rakhein
+    if (alertToast) {
+        alertToast.style.display = "none";
+    }
+
+    // 2. Agar button page par maujood hai (URL strict check hata diya taaki testing aasan ho)
+    if (listViewBtn) {
+        
+        // Jab user List View button par click karega
+        listViewBtn.addEventListener("click", function() {
+            
+            // 3. SAFE CONDITION: Agar screen choti hai YA mobile device hai
+            const isMobileScreen = window.innerWidth <= 768;
+            const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+
+            if ((isMobileScreen || isMobileDevice) && alertToast) {
+                
+                // Pop-up ko display block/flex karke dikhayein
+                alertToast.style.display = "flex";
+                
+                // Smooth animation ke liye chota sa delay
+                setTimeout(() => {
+                    alertToast.classList.add("show");
+                }, 50);
+
+                // 10 seconds baad automatic close karne ka timer
+                const autoCloseTimeout = setTimeout(closeToast, 10500);
+
+                // Manually 'x' click par close logic
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", () => {
+                        clearTimeout(autoCloseTimeout);
+                        closeToast();
+                    });
+                }
+            }
+        });
+    }
+
+    function closeToast() {
+        if (alertToast) {
+            alertToast.classList.remove("show");
+            setTimeout(() => {
+                alertToast.style.display = "none";
+            }, 500);
+        }
+    }
+});
+
+//=================================================================//
+//                    LIST VIEW POP SCRIPT ENDS
+//=================================================================//
+
+//=================================================================//
+//                     BUTTON SELECTION SCRIPT STARTS
+//=================================================================//
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btnList = document.getElementById("btn-list-view");
+    const btnGrid = document.getElementById("btn-grid-view");
+    
+    const listSection = document.getElementById("bda-list-view-section");
+    const gridSection = document.getElementById("bda-grid-view-section");
+
+    // 📝 लिस्ट व्यू पर क्लिक करने पर
+    btnList.addEventListener("click", function () {
+        btnList.classList.add("active");
+        btnGrid.classList.remove("active");
+        
+        listSection.classList.replace("display-off", "display-on");
+        gridSection.classList.replace("display-on", "display-off");
+    });
+
+    // 📊 ग्रिड व्यू पर क्लिक करने पर
+    btnGrid.addEventListener("click", function () {
+        btnGrid.classList.add("active");
+        btnList.classList.remove("active");
+        
+        gridSection.classList.replace("display-off", "display-on");
+        listSection.classList.replace("display-on", "display-off");
+    });
+});
+//=================================================================//
+//                   BUTTON SELECTION SCRIPT ENDS
+//=================================================================//
+
+//=================================================================//
+//                     GRID VIEW SCRIPT STARTS
+//=================================================================//
+
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.querySelector(".bda-input-search");
+    const allCompaniesCheckbox = document.getElementById("company-all");
+    const singleCompaniesCheckboxes = document.querySelectorAll(".company-single");
+    const allCategoriesCheckbox = document.getElementById("category-all");
+    const singleCategoriesCheckboxes = document.querySelectorAll(".category-single");
+    const productCards = document.querySelectorAll(".bda-product-card");
+    const btnExcel = document.getElementById("btn-download-excel");
+    const btnWhatsapp = document.getElementById("btn-share-whatsapp");
+
+    allCompaniesCheckbox.addEventListener("change", function() {
+        if (this.checked) singleCompaniesCheckboxes.forEach(cb => cb.checked = false);
+        filterProducts();
+    });
+    singleCompaniesCheckboxes.forEach(cb => {
+        cb.addEventListener("change", function() {
+            if (this.checked) allCompaniesCheckbox.checked = false;
+            if (!Array.from(singleCompaniesCheckboxes).some(c => c.checked)) allCompaniesCheckbox.checked = true;
+            filterProducts();
+        });
+    });
+
+    allCategoriesCheckbox.addEventListener("change", function() {
+        if (this.checked) singleCategoriesCheckboxes.forEach(cb => cb.checked = false);
+        filterProducts();
+    });
+    singleCategoriesCheckboxes.forEach(cb => {
+        cb.addEventListener("change", function() {
+            if (this.checked) allCategoriesCheckbox.checked = false;
+            if (!Array.from(singleCategoriesCheckboxes).some(c => c.checked)) allCategoriesCheckbox.checked = true;
+            filterProducts();
+        });
+    });
+
+    function filterProducts() {
+        const searchText = searchInput.value.toLowerCase().trim();
+        const isAllCompanySelected = allCompaniesCheckbox.checked;
+        const activeCompanies = [];
+        singleCompaniesCheckboxes.forEach(cb => { if (cb.checked) activeCompanies.push(cb.value); });
+
+        const isAllCategorySelected = allCategoriesCheckbox.checked;
+        const activeCategories = [];
+        singleCategoriesCheckboxes.forEach(cb => { if (cb.checked) activeCategories.push(cb.value); });
+
+        productCards.forEach(card => {
+            const brandName = card.getAttribute("data-brand").toLowerCase();
+            const cardCompany = card.getAttribute("data-company");
+            const cardCategory = card.getAttribute("data-category");
+
+            const matchesSearch = brandName.includes(searchText);
+            const matchesCompany = isAllCompanySelected || activeCompanies.includes(cardCompany);
+            const matchesCategory = isAllCategorySelected || activeCategories.includes(cardCategory);
+
+            if (matchesSearch && matchesCompany && matchesCategory) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+    searchInput.addEventListener("input", filterProducts);
+
+    function getSelectedProductsData() {
+        const selectedData = [];
+        productCards.forEach(card => {
+            const isChecked = card.querySelector(".bda-product-select-check").checked;
+            if (isChecked && card.style.display !== "none") {
+                selectedData.push({
+                    Brand: card.getAttribute("data-brand"),
+                    Company: card.getAttribute("data-company").toUpperCase(),
+                    Category: card.querySelector(".bda-cat-val").innerText,
+                    Needle_Profile: card.querySelector(".bda-needle-val").innerText,
+                    Suture_Profile: card.querySelector(".bda-suture-val").innerText,
+                    MRP: card.querySelector(".bda-mrp-val").innerText
+                });
+            }
+        });
+        return selectedData;
+    }
+
+    btnExcel.addEventListener("click", function() {
+        const data = getSelectedProductsData();
+        if (data.length === 0) {
+            alert("कृपया एक्सपोर्ट करने के लिए पहले 'चुनें (Select)' चेकबॉक्स पर टिक करें!");
+            return;
+        }
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Products");
+        XLSX.writeFile(workbook, "Product_Matrix_Report.xlsx");
+    });
+
+    btnWhatsapp.addEventListener("click", function() {
+        const data = getSelectedProductsData();
+        if (data.length === 0) {
+            alert("कृपया व्हाट्सएप पर भेजने के लिए पहले किसी उत्पाद को सेलेक्ट करें!");
+            return;
+        }
+        let messageText = "*📦 Selected Products Report *\n\n";
+        data.forEach((prod, index) => {
+            messageText += `${index + 1}. *${prod.Brand}* (${prod.Company})\n`;
+            messageText += `   • Cat: ${prod.Category}\n`;
+            messageText += `   • Price: ${prod.MRP}\n\n`;
+        });
+        const whatsappUrl = `https://whatsapp.com{encodeURIComponent(messageText)}`;
+        window.open(whatsappUrl, "_blank");
+    });
+});
+//=================================================================//
+//                      GRID VIEW SCRIPT STARTS
+//=================================================================//
 //===========================================================================
-//       BIHAR DRUGS AGENCY (BDA) - PRODUCTS MATRIX  PAGE SCRIPT STARTS
+//        BIHAR DRUGS AGENCY (BDA) - PRODUCTS MATRIX PAGE SCRIPT STARTS
 //===========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("pharmaLiveSearchInput");
@@ -709,259 +967,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 //=================================================================================
-//            BIHAR DRUGS AGENCY (BDA)- PRODUCTS MATRIX  PAGE SCRIPT ENDS
+//            BIHAR DRUGS AGENCY (BDA)- PRODUCTS MATRIX PAGE SCRIPT ENDS
 //=================================================================================
-//=================================================================================
-//         BIHAR DRUGS AGENCY (BDA)- HEADER MENU BUTTON ON CLICK HOVER STARTS
-//=================================================================================
- // 1. HAMBURGER LOGIC (Pure document par click trace karega)
-document.addEventListener('click', function (e) {
-    // Agar bdaHamburgerBtn par click ho ya uske andar ke <span> par
-    if (e.target.closest('#bdaHamburgerBtn') || e.target.closest('.bda-hamburger')) {
-        const navMenu = document.getElementById('bdaNavMenu');
-        if (navMenu) {
-            navMenu.classList.toggle('open');
-            console.log("Menu Open/Close Toggle Hua!");
-        }
-    }
-});
 
-// 2. ACTIVE PAGE LOGIC (Page load hote hi highlight karega)
-document.addEventListener("DOMContentLoaded", function () {
-    // Current URL se page ka naam nikalega (e.g., aboutpage.html)
-    const currentPage = window.location.pathname.split("/").pop();
-    const menuLinks = document.querySelectorAll('#bdaNavMenu li a');
-
-    menuLinks.forEach(link => {
-        // Pehle se lagi active class hatayein
-        link.classList.remove('bda-active');
-        
-        // Link ka href nikalen
-        const linkPage = link.getAttribute('href');
-
-        // Agar match kare toh active class laga dein
-        if (currentPage === linkPage) {
-            link.classList.add('bda-active');
-        } 
-        // Default home page ke liye condition
-        else if ((currentPage === "" || currentPage === "index.html") && linkPage === "index.html") {
-            link.classList.add('bda-active');
-        }
-    });
-});
-
-//=================================================================================
-//          BIHAR DRUGS AGENCY (BDA)- HEADER MENU BUTTON ON CLICK HOVER ENDS
-//=================================================================================
-//=================================================================//
-//                     GRID VIEW BUTTON SCRIPT STARTS
-//=================================================================//
-
-document.addEventListener("DOMContentLoaded", function () {
-    const btnList = document.getElementById("btn-list-view");
-    const btnGrid = document.getElementById("btn-grid-view");
-    
-    const listSection = document.getElementById("bda-list-view-section");
-    const gridSection = document.getElementById("bda-grid-view-section");
-
-    // 📝 लिस्ट व्यू पर क्लिक करने पर
-    btnList.addEventListener("click", function () {
-        btnList.classList.add("active");
-        btnGrid.classList.remove("active");
-        
-        listSection.classList.replace("display-off", "display-on");
-        gridSection.classList.replace("display-on", "display-off");
-    });
-
-    // 📊 ग्रिड व्यू पर क्लिक करने पर
-    btnGrid.addEventListener("click", function () {
-        btnGrid.classList.add("active");
-        btnList.classList.remove("active");
-        
-        gridSection.classList.replace("display-off", "display-on");
-        listSection.classList.replace("display-on", "display-off");
-    });
-});
-//=================================================================//
-//                     GRID VIEW SCRIPT ENDS
-//=================================================================//
-
-//=================================================================//
-//                     GRID VIEW SCRIPT STARTS
-//=================================================================//
-
-document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.querySelector(".bda-input-search");
-    const allCompaniesCheckbox = document.getElementById("company-all");
-    const singleCompaniesCheckboxes = document.querySelectorAll(".company-single");
-    const allCategoriesCheckbox = document.getElementById("category-all");
-    const singleCategoriesCheckboxes = document.querySelectorAll(".category-single");
-    const productCards = document.querySelectorAll(".bda-product-card");
-    const btnExcel = document.getElementById("btn-download-excel");
-    const btnWhatsapp = document.getElementById("btn-share-whatsapp");
-
-    allCompaniesCheckbox.addEventListener("change", function() {
-        if (this.checked) singleCompaniesCheckboxes.forEach(cb => cb.checked = false);
-        filterProducts();
-    });
-    singleCompaniesCheckboxes.forEach(cb => {
-        cb.addEventListener("change", function() {
-            if (this.checked) allCompaniesCheckbox.checked = false;
-            if (!Array.from(singleCompaniesCheckboxes).some(c => c.checked)) allCompaniesCheckbox.checked = true;
-            filterProducts();
-        });
-    });
-
-    allCategoriesCheckbox.addEventListener("change", function() {
-        if (this.checked) singleCategoriesCheckboxes.forEach(cb => cb.checked = false);
-        filterProducts();
-    });
-    singleCategoriesCheckboxes.forEach(cb => {
-        cb.addEventListener("change", function() {
-            if (this.checked) allCategoriesCheckbox.checked = false;
-            if (!Array.from(singleCategoriesCheckboxes).some(c => c.checked)) allCategoriesCheckbox.checked = true;
-            filterProducts();
-        });
-    });
-
-    function filterProducts() {
-        const searchText = searchInput.value.toLowerCase().trim();
-        const isAllCompanySelected = allCompaniesCheckbox.checked;
-        const activeCompanies = [];
-        singleCompaniesCheckboxes.forEach(cb => { if (cb.checked) activeCompanies.push(cb.value); });
-
-        const isAllCategorySelected = allCategoriesCheckbox.checked;
-        const activeCategories = [];
-        singleCategoriesCheckboxes.forEach(cb => { if (cb.checked) activeCategories.push(cb.value); });
-
-        productCards.forEach(card => {
-            const brandName = card.getAttribute("data-brand").toLowerCase();
-            const cardCompany = card.getAttribute("data-company");
-            const cardCategory = card.getAttribute("data-category");
-
-            const matchesSearch = brandName.includes(searchText);
-            const matchesCompany = isAllCompanySelected || activeCompanies.includes(cardCompany);
-            const matchesCategory = isAllCategorySelected || activeCategories.includes(cardCategory);
-
-            if (matchesSearch && matchesCompany && matchesCategory) {
-                card.style.display = "flex";
-            } else {
-                card.style.display = "none";
-            }
-        });
-    }
-    searchInput.addEventListener("input", filterProducts);
-
-    function getSelectedProductsData() {
-        const selectedData = [];
-        productCards.forEach(card => {
-            const isChecked = card.querySelector(".bda-product-select-check").checked;
-            if (isChecked && card.style.display !== "none") {
-                selectedData.push({
-                    Brand: card.getAttribute("data-brand"),
-                    Company: card.getAttribute("data-company").toUpperCase(),
-                    Category: card.querySelector(".bda-cat-val").innerText,
-                    Needle_Profile: card.querySelector(".bda-needle-val").innerText,
-                    Suture_Profile: card.querySelector(".bda-suture-val").innerText,
-                    MRP: card.querySelector(".bda-mrp-val").innerText
-                });
-            }
-        });
-        return selectedData;
-    }
-
-    btnExcel.addEventListener("click", function() {
-        const data = getSelectedProductsData();
-        if (data.length === 0) {
-            alert("कृपया एक्सपोर्ट करने के लिए पहले 'चुनें (Select)' चेकबॉक्स पर टिक करें!");
-            return;
-        }
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Products");
-        XLSX.writeFile(workbook, "Product_Matrix_Report.xlsx");
-    });
-
-    btnWhatsapp.addEventListener("click", function() {
-        const data = getSelectedProductsData();
-        if (data.length === 0) {
-            alert("कृपया व्हाट्सएप पर भेजने के लिए पहले किसी उत्पाद को सेलेक्ट करें!");
-            return;
-        }
-        let messageText = "*📦 Selected Products Report *\n\n";
-        data.forEach((prod, index) => {
-            messageText += `${index + 1}. *${prod.Brand}* (${prod.Company})\n`;
-            messageText += `   • Cat: ${prod.Category}\n`;
-            messageText += `   • Price: ${prod.MRP}\n\n`;
-        });
-        const whatsappUrl = `https://whatsapp.com{encodeURIComponent(messageText)}`;
-        window.open(whatsappUrl, "_blank");
-    });
-});
-//=================================================================//
-//                      GRID VIEW SCRIPT ENDS
-//=================================================================//
-///-===============================================================//
-//                    LIST VIEW POP SCRIPT STARTS
-//=================================================================//
-document.addEventListener("DOMContentLoaded", function () {
-    // 1. Element selectors
-    const listViewBtn = document.getElementById('btn-grid-view'); 
-    const alertToast = document.getElementById("orientationAlert");
-    const closeBtn = document.getElementById("closeToastBtn");
-    
-    // Pura URL nikalne ke liye
-    const currentUrl = window.location.href;
-
-    // Shuru me pop-up ko hidden rakhein
-    if (alertToast) {
-        alertToast.style.display = "none";
-    }
-
-    // 2. Agar button page par maujood hai (URL strict check hata diya taaki testing aasan ho)
-    if (listViewBtn) {
-        
-        // Jab user List View button par click karega
-        listViewBtn.addEventListener("click", function() {
-            
-            // 3. SAFE CONDITION: Agar screen choti hai YA mobile device hai
-            const isMobileScreen = window.innerWidth <= 768;
-            const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
-
-            if ((isMobileScreen || isMobileDevice) && alertToast) {
-                
-                // Pop-up ko display block/flex karke dikhayein
-                alertToast.style.display = "flex";
-                
-                // Smooth animation ke liye chota sa delay
-                setTimeout(() => {
-                    alertToast.classList.add("show");
-                }, 50);
-
-                // 10 seconds baad automatic close karne ka timer
-                const autoCloseTimeout = setTimeout(closeToast, 10500);
-
-                // Manually 'x' click par close logic
-                if (closeBtn) {
-                    closeBtn.addEventListener("click", () => {
-                        clearTimeout(autoCloseTimeout);
-                        closeToast();
-                    });
-                }
-            }
-        });
-    }
-
-    function closeToast() {
-        if (alertToast) {
-            alertToast.classList.remove("show");
-            setTimeout(() => {
-                alertToast.style.display = "none";
-            }, 500);
-        }
-    }
-});
-
-//=================================================================//
-//                    LIST VIEW POP SCRIPT ENDS
-//=================================================================//
